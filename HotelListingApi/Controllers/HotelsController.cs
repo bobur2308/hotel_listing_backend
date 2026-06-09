@@ -14,7 +14,7 @@ public class HotelsController : ControllerBase
     };
     
     [HttpGet]
-    public ActionResult<IEnumerable<Hotel> Get()
+    public ActionResult<IEnumerable<Hotel>> Get()
     {
         return Ok(hotels);
     }
