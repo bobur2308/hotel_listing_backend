@@ -29,20 +29,34 @@ public class HotelsController : ControllerBase
     }
 
     [HttpPost]
-    public void Post([FromBody] string value)
+    public ActionResult<Hotel> Post([FromBody] Hotel data)
     {
+        if (hotels.Any(h => h.Id == data.Id))
+            return BadRequest("Hotel with this Id already exists.");
         
+        hotels.Add(data);
+        return CreatedAtAction(nameof(Get), new { id = data.Id }, data);
     }
 
     [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
+    public ActionResult Put(int id, [FromBody] Hotel data)
     {
-        
+        var existingHotel = hotels.FirstOrDefault(h => h.Id == id);
+        if (existingHotel == null)
+            return NotFound(); 
+        existingHotel.Rating = data.Rating;
+        existingHotel.Address = data.Address;
+        existingHotel.Name = data.Name;
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
-    public void Delete(int id)
+    public ActionResult Delete(int id)
     {
-        
+        var hotel = hotels.FirstOrDefault(h => h.Id == id);
+        if (hotels == null)
+            return NotFound();
+        hotels.Remove(hotel);
+        return NoContent();
     }
 }
