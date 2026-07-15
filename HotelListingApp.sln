@@ -2,6 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelListingApi", "HotelListingApi\HotelListingApi.csproj", "{AC2EBC68-276C-4A98-A7F7-E2CA6E78BEE3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{69EEA890-70C2-4271-AB84-FDAE8039ACCC}"
+	ProjectSection(SolutionItems) = preProject
+		Database\Scripts\0001_create_countries_table.sql = Database\Scripts\0001_create_countries_table.sql
+		Database\Scripts\0002_create_hotels_table.sql = Database\Scripts\0002_create_hotels_table.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
