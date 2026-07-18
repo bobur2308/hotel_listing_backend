@@ -1,10 +1,5 @@
--- Creates the Countries table
-IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Countries')
-BEGIN
-    CREATE TABLE Countries
-    (
-        CountryId  INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-        Name       NVARCHAR(100) NOT NULL,
-        ShortName  NVARCHAR(10)  NOT NULL
-    );
-END
+CREATE table countries(
+                          id bigserial primary key ,
+                          full_name varchar(255) not null,
+                          short_name varchar(155) not null
+);
