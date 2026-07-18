@@ -53,14 +53,14 @@ public class CountriesController:ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            // if (!CountryExists(id))
-            // {
-            //     return NotFound();
-            // }
-            // else
-            // {
-            //     throw;
-            // }
+            if (!CountryExists(id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
         }
         return NoContent(); 
     }
@@ -76,5 +76,10 @@ public class CountriesController:ControllerBase
         _context.Countries.Remove(country);
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    private bool CountryExists(int id)
+    {
+        return _context.Countries.Any(e => e.CountryId == id);
     }
 }
