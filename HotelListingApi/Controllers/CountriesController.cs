@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListingApi.Controllers;
-[Microsoft.AspNetCore.Components.Route("api/countries")]
 [ApiController]
+[Route("api/[controller]")]
 public class CountriesController:ControllerBase
 {   
     private readonly HotelListingDbContext _context;
