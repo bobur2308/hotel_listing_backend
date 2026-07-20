@@ -1,5 +1,6 @@
 ﻿using HotelListingApi.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelListingApi.Controllers;
 
@@ -7,56 +8,77 @@ namespace HotelListingApi.Controllers;
 [ApiController]
 public class HotelsController : ControllerBase
 {
-    private static List<Hotel> hotels = new List<Hotel>()
+    private readonly HotelListingDbContext _context;
+
+    public HotelsController(HotelListingDbContext context)
     {
-        new  Hotel{ Id = 1, Name = "Hotel 1",Address = "Hotel 1" ,Rating = 5.5 },
-        new  Hotel{ Id = 2, Name = "Hotel 2",Address = "Hotel 2" ,Rating = 4.2 },
-    };
-    
+        _context = context;
+    }
+
     [HttpGet]
-    public ActionResult<IEnumerable<Hotel>> Get()
+    public async Task<ActionResult<IEnumerable<Hotel>>> GetHotels()
     {
-        return Ok(hotels);
+        return await _context.Hotels.ToListAsync();
     }
 
     [HttpGet("{id}")]
-    public ActionResult<Hotel> Get(int id)
+    public async Task<ActionResult<Hotel>> GetHotel(int id)
     {
-        var hotel = hotels.FirstOrDefault(h => h.Id == id);
-        if (hotel == null) 
+        var hotel = await _context.Hotels.FirstOrDefaultAsync(x => x.CountryId == id);
+
+        if (hotel == null)
+        {
             return NotFound();
+        }
         return hotel;
     }
 
     [HttpPost]
-    public ActionResult<Hotel> Post([FromBody] Hotel data)
+    public async Task<ActionResult<Hotel>> PostHotel(Hotel hotel)
     {
-        if (hotels.Any(h => h.Id == data.Id))
-            return BadRequest("Hotel with this Id already exists.");
-        
-        hotels.Add(data);
-        return CreatedAtAction(nameof(Get), new { id = data.Id }, data);
+        await _context.Hotels.AddAsync(hotel);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction("GetHotel", new { id = hotel.CountryId }, hotel);
     }
 
     [HttpPut("{id}")]
-    public ActionResult Put(int id, [FromBody] Hotel data)
+    public async Task<IActionResult> PutHotel(int id, Hotel hotel)
     {
-        var existingHotel = hotels.FirstOrDefault(h => h.Id == id);
-        if (existingHotel == null)
-            return NotFound(); 
-        existingHotel.Rating = data.Rating;
-        existingHotel.Address = data.Address;
-        existingHotel.Name = data.Name;
-        return NoContent();
+        if (id != hotel.Id) return BadRequest();
+        
+        _context.Entry(hotel).State = EntityState.Modified;
+        
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!await HotelExists(id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+        return NoContent(); 
+        
     }
 
     [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
+    public async Task<IActionResult> DeleteHotel(int id)
     {
-        var hotel = hotels.FirstOrDefault(h => h.Id == id);
-        if (hotels == null)
-            return NotFound();
-        hotels.Remove(hotel);
+        var hotel = await _context.Hotels.FirstOrDefaultAsync(x => x.CountryId == id);
+        if (hotel == null) return NotFound();
+        _context.Hotels.Remove(hotel);
+        await _context.SaveChangesAsync();
         return NoContent();
+    }
+    
+    private async Task<bool> HotelExists(int id)
+    {
+        return await _context.Hotels.AnyAsync(e => e.Id == id);
     }
 }

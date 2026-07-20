@@ -35,7 +35,7 @@ public class CountriesController:ControllerBase
     [HttpPost]
     public async Task<ActionResult<Country>> PostCountry(Country country)
     {
-        _context.Countries.Add(country);
+        await _context.Countries.AddAsync(country);
         await _context.SaveChangesAsync();
         return CreatedAtAction("GetCountry", new { id = country.CountryId }, country);
     }
