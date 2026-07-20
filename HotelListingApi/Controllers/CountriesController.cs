@@ -53,7 +53,7 @@ public class CountriesController:ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!CountryExists(id))
+            if (!await CountryExists(id))
             {
                 return NotFound();
             }
@@ -78,7 +78,7 @@ public class CountriesController:ControllerBase
         return NoContent();
     }
 
-    private bool CountryExists(int id)
+    private async Task<bool> CountryExists(int id)
     {
         return _context.Countries.Any(e => e.CountryId == id);
     }
