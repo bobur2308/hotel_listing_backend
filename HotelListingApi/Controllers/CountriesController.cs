@@ -80,6 +80,6 @@ public class CountriesController:ControllerBase
 
     private async Task<bool> CountryExists(int id)
     {
-        return _context.Countries.Any(e => e.CountryId == id);
+        return await _context.Countries.AnyAsync(e => e.CountryId == id);
     }
 }
