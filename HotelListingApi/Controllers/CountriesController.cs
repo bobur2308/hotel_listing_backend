@@ -17,13 +17,13 @@ public class CountriesController:ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Country>>> GetCountries()
     {
-        return await _context.Countries.ToListAsync();
+        return await _context.Countries.Include(c => c.Hotels).ToListAsync();
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Country>> GetCountry(int id)
     {
-        var country = await _context.Countries.FirstOrDefaultAsync(x => x.CountryId == id);
+        var country = await _context.Countries.Include(c => c.Hotels).FirstOrDefaultAsync(x => x.Id == id);
 
         if (country == null)
         {
@@ -37,13 +37,13 @@ public class CountriesController:ControllerBase
     {
         await _context.Countries.AddAsync(country);
         await _context.SaveChangesAsync();
-        return CreatedAtAction("GetCountry", new { id = country.CountryId }, country);
+        return CreatedAtAction("GetCountry", new { id = country.Id }, country);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> PutCountry(int id, Country country)
     {
-        if(id != country.CountryId) return BadRequest();
+        if(id != country.Id) return BadRequest();
         
         _context.Entry(country).State = EntityState.Modified;
 
@@ -80,6 +80,6 @@ public class CountriesController:ControllerBase
 
     private async Task<bool> CountryExists(int id)
     {
-        return await _context.Countries.AnyAsync(e => e.CountryId == id);
+        return await _context.Countries.AnyAsync(e => e.Id == id);
     }
 }

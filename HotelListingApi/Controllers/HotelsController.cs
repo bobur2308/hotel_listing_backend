@@ -18,13 +18,13 @@ public class HotelsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Hotel>>> GetHotels()
     {
-        return await _context.Hotels.ToListAsync();
+        return await _context.Hotels.Include(h => h.Country).ToListAsync();
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Hotel>> GetHotel(int id)
     {
-        var hotel = await _context.Hotels.FirstOrDefaultAsync(x => x.CountryId == id);
+        var hotel = await _context.Hotels.Include(h => h.Country).FirstOrDefaultAsync(x => x.Id == id);
 
         if (hotel == null)
         {
@@ -38,7 +38,7 @@ public class HotelsController : ControllerBase
     {
         await _context.Hotels.AddAsync(hotel);
         await _context.SaveChangesAsync();
-        return CreatedAtAction("GetHotel", new { id = hotel.CountryId }, hotel);
+        return CreatedAtAction("GetHotel", new { id = hotel.Id }, hotel);
     }
 
     [HttpPut("{id}")]
@@ -70,7 +70,7 @@ public class HotelsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteHotel(int id)
     {
-        var hotel = await _context.Hotels.FirstOrDefaultAsync(x => x.CountryId == id);
+        var hotel = await _context.Hotels.FirstOrDefaultAsync(x => x.Id == id);
         if (hotel == null) return NotFound();
         _context.Hotels.Remove(hotel);
         await _context.SaveChangesAsync();
