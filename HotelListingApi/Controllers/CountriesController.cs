@@ -1,6 +1,7 @@
 ﻿using HotelListingApi.Data;
 using HotelListingApi.DTOs.Country;
 using HotelListingApi.DTOs.Hotel;
+using HotelListingApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,45 +10,25 @@ namespace HotelListingApi.Controllers;
 [Route("api/[controller]")]
 public class CountriesController:ControllerBase
 {   
-    private readonly HotelListingDbContext _context;
+    private readonly ICountriesService  _countriesService;
 
-    public CountriesController(HotelListingDbContext context)
+    public CountriesController(ICountriesService countriesService)
     {
-        _context = context;
+        _countriesService = countriesService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetCountries()
+    public async Task<ActionResult> GetCountries()
     {
-        var countries = await _context.Countries
-            .Select( x => new GetCountriesDto(
-                x.Id,
-                x.FullName,
-                x.ShortName
-                )
-            )
-            .ToListAsync();
+        var countries = await _countriesService.GetCountries();
         
         return Ok(countries);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetCountryDto>> GetCountry(int id)
+    public async Task<ActionResult> GetCountry(int id)
     {
-        var country = await _context.Countries
-            .Where(x => x.Id == id)
-            .Select(x => new GetCountryDto(
-                x.Id,
-                x.FullName,
-                x.ShortName,
-                x.Hotels.Select(h => new GetHotelSlimDto(
-                    h.Id,
-                    h.FullName,
-                    h.Address,
-                    h.Rating
-                )).ToList()
-            ))
-            .FirstOrDefaultAsync();
+        var country = await _countriesService.GetCountryAsync(id);
 
         if (country == null)
         {
@@ -57,15 +38,10 @@ public class CountriesController:ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Country>> PostCountry(CreateCountryDto countryDto)
+    public async Task<ActionResult> PostCountry(CreateCountryDto countryDto)
     {
-        var country = new Country()
-        {
-            FullName = countryDto.FullName,
-            ShortName = countryDto.ShortName,
-        };
-        await _context.Countries.AddAsync(country);
-        await _context.SaveChangesAsync();
+        var country = await _countriesService.CreateCountryAsync(countryDto);
+        
         return CreatedAtAction("GetCountry", new { id = country.Id }, country);
     }
 
@@ -74,47 +50,17 @@ public class CountriesController:ControllerBase
     {
         if(id != countryDto.Id) return BadRequest();
         
-        var country = await _context.Countries.FirstOrDefaultAsync(x => x.Id == id);
+        await _countriesService.UpdateCountryAsync(id,countryDto);
         
-        if(country == null) return NotFound();
-        country.FullName = countryDto.FullName;
-        country.ShortName = countryDto.ShortName;
-        
-        _context.Entry(country).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await CountryExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
         return NoContent(); 
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCountry(int id)
     {
-        var country = await _context.Countries.FindAsync(id);
-        if (country == null)
-        {
-            return NotFound();
-        }
-        _context.Countries.Remove(country);
-        await _context.SaveChangesAsync();
+        await _countriesService.DeleteCountryAsync(id);
+        
         return NoContent();
     }
 
-    private async Task<bool> CountryExists(int id)
-    {
-        return await _context.Countries.AnyAsync(e => e.Id == id);
-    }
 }

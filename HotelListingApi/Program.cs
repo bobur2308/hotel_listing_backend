@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using HotelListingApi.Data;
+using HotelListingApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -11,6 +12,7 @@ var connectionString = builder.Configuration.GetConnectionString("HotelListingDb
 builder.Services.AddDbContext<HotelListingDbContext>(options => options.UseNpgsql(connectionString));
 
 // Add services to the container.
+builder.Services.AddScoped<ICountriesService, CountriesService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
