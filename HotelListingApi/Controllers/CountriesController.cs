@@ -10,17 +10,17 @@ namespace HotelListingApi.Controllers;
 [Route("api/[controller]")]
 public class CountriesController:ControllerBase
 {   
-    private readonly ICountriesService  _countriesService;
+    private readonly ICountriesService  _service;
 
-    public CountriesController(ICountriesService countriesService)
+    public CountriesController(ICountriesService service)
     {
-        _countriesService = countriesService;
+        _service = service;
     }
 
     [HttpGet]
     public async Task<ActionResult> GetCountries()
     {
-        var countries = await _countriesService.GetCountries();
+        var countries = await _service.GetCountries();
         
         return Ok(countries);
     }
@@ -28,7 +28,7 @@ public class CountriesController:ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult> GetCountry(int id)
     {
-        var country = await _countriesService.GetCountryAsync(id);
+        var country = await _service.GetCountryAsync(id);
 
         if (country == null)
         {
@@ -40,7 +40,7 @@ public class CountriesController:ControllerBase
     [HttpPost]
     public async Task<ActionResult> PostCountry(CreateCountryDto countryDto)
     {
-        var country = await _countriesService.CreateCountryAsync(countryDto);
+        var country = await _service.CreateCountryAsync(countryDto);
         
         return CreatedAtAction("GetCountry", new { id = country.Id }, country);
     }
@@ -50,7 +50,7 @@ public class CountriesController:ControllerBase
     {
         if(id != countryDto.Id) return BadRequest();
         
-        await _countriesService.UpdateCountryAsync(id,countryDto);
+        await _service.UpdateCountryAsync(id,countryDto);
         
         return NoContent(); 
     }
@@ -58,7 +58,7 @@ public class CountriesController:ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCountry(int id)
     {
-        await _countriesService.DeleteCountryAsync(id);
+        await _service.DeleteCountryAsync(id);
         
         return NoContent();
     }
